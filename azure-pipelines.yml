@@ -43,7 +43,7 @@ stages:
         debug: true
         loginDockerConfig: true
         image: 'elywen/simplon'
-        severities: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+        severities: 'CRITICAL,HIGH,MEDIUM'
         ignoreUnfixed: true
 
 # Deploy to QA
