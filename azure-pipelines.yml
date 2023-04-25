@@ -56,12 +56,12 @@ stages:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
     pool:
-      vmImage: 'python:3.4-alpine'
+      vmImage: 'ubuntu-latest'
     steps:
     - task: Docker@2
       displayName: 'Run Trivy container'
       inputs:
-        command: 'run aquasec/trivy'
+        command: 'run aquasec/trivy image python:3.4-alpine'
         containerRegistry: 'DockerHubConnection'
         repository: 'aquasec/trivy'
         tag: 'latest'
