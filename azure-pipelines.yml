@@ -28,9 +28,27 @@ stages:
         Dockerfile: './Dockerfile'
         tags: 'latest'
 
+# Security Trivy
+- stage: TrivyScanSec
+  dependsOn: Build
+  jobs:
+  - job: TrivyScan
+    displayName: 'Run Trivy Scan'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: trivy@1
+      inputs:
+        version: 'latest'
+        debug: true
+        loginDockerConfig: true
+        image: 'elywen/simplon'
+        severities: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+        ignoreUnfixed: true
+
 # Deploy to QA
 - stage: DeployQA
-  dependsOn: Build
+  dependsOn: TrivyScanSec
   jobs:
   - job: DeployToQA
     displayName: 'Deploy to QA'
@@ -48,27 +66,6 @@ stages:
         secretType: 'dockerRegistry'
         containerRegistryType: 'Container Registry'
         dockerRegistryEndpoint: 'DockerHubConnection'
-
-# Security Trivy
-- stage: TrivyScanSec
-  dependsOn: DeployQA
-  jobs:
-  - job: TrivyScan
-    displayName: 'Run Trivy Scan'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Docker@2
-      displayName: 'Run Trivy container'
-      inputs:
-        command: 'run aquasec/trivy'
-        containerRegistry: 'DockerHubConnection'
-        repository: 'aquasec/trivy'
-        tag: 'latest'
-        containerCommand: 'trivy --exit-code 1 --no-progress $(acrRegistry)/$(acrRepository):$(Build.BuildNumber)'
-      env:
-        acrRegistry: 'elywen'
-        acrRepository: 'simplon'
 
 # Test QA service
 - stage: TestQA
