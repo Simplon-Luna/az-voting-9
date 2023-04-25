@@ -1,0 +1,81 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  imageRepository: 'elywen/simplon'
+  imageName: 'voting'
+  dockerfilePath: './Dockerfile'
+  kubernetesServiceEndpoint: 'KlusterLunaConnection'
+  canaryTag: 'canary'
+
+# Deploy Prod
+- stage: PromoteProd
+  dependsOn: TestQA
+  jobs:
+  - job: CanaryDeploy
+    displayName: 'Canary Deploy to Prod'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Bash@3
+      inputs:
+        filePath: './testcanary.sh'
+
+    - task: Kubernetes@1
+      displayName: Promote Canary Deployment to Prod
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: '$(kubernetesServiceEndpoint)'
+        namespace: 'prod'
+        command: 'apply'
+        arguments: '-f ./k8s/deployment.yaml'
+
+# testing Prod Service post canary
+- stage: TestProd
+  dependsOn: PromoteProd
+  jobs:
+  - job: TestProdService
+    displayName: 'Test Prod Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        curl https://kitty.simplon-ely.space/
+      displayName: Test Prod Service with curl
+
+# Delete Canary
+- stage: DeleteCanary
+  dependsOn: TestProd
+  jobs:
+  - job: DeleteCanaryDeploy
+    displayName: 'Deletion of Canary Deployment'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'KlusterLunaConnection'
+        namespace: 'prod'
+        command: 'delete'
+        arguments: 'deployment alfred-voteapp-canary -n prod'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+
+# Signout
+- stage: SignOut
+  jobs:
+    - job: SigningOut
+      displayName: 'Elywen Signing Out'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: CmdLine@2
+        inputs:
+          script: |
+            echo Thank you for using my Pipeline.
+            echo
+            echo Elywen is wishing you the best possible day !

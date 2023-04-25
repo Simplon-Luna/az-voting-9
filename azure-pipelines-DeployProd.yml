@@ -1,0 +1,70 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  imageRepository: 'elywen/simplon'
+  imageName: 'voting'
+  dockerfilePath: './Dockerfile'
+  kubernetesServiceEndpoint: 'KlusterLunaConnection'
+  canaryTag: 'canary'
+
+
+# Deploy Prod
+- stage: DeployProd
+  jobs:
+  - job: CanaryDeploy
+    displayName: 'Canary Deploy to Prod'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Kubernetes@1
+      displayName: Canary Deploy to Prod
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: '$(kubernetesServiceEndpoint)'
+        namespace: 'prod'
+        command: 'apply'
+        arguments: '-f ./k8s/deployment-canary.yaml'
+
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'KlusterLunaConnection'
+        namespace: 'prod'
+        command: 'login'
+
+    - task: Bash@3
+      inputs:
+        filePath: './testcanary.sh'
+
+# testing Prod Service post canary
+- stage: TestProd
+  dependsOn: DeployProd
+  jobs:
+  - job: TestProdService
+    displayName: 'Test Prod Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        curl https://kitty.simplon-ely.space/
+      displayName: Test Prod Service with curl
+
+
+# Signout
+- stage: SignOut
+  jobs:
+    - job: SigningOut
+      displayName: 'Elywen Signing Out'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: CmdLine@2
+        inputs:
+          script: |
+            echo Thank you for using my Pipeline.
+            echo
+            echo Elywen is wishing you the best possible day !
