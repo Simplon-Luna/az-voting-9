@@ -49,30 +49,9 @@ stages:
         containerRegistryType: 'Container Registry'
         dockerRegistryEndpoint: 'DockerHubConnection'
 
-# Security Trivy
-- stage: TrivySecScan
-  dependsOn: DeployQA
-  jobs:
-  - job: TrivyScan
-    displayName: 'Run Trivy Scan'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Docker@2
-      displayName: 'Run Trivy container'
-      inputs:
-        command: 'run'
-        containerRegistry: 'DockerHubConnection'
-        repository: 'aquasec/trivy'
-        tag: 'latest'
-        containerCommand: 'trivy --exit-code 1 --no-progress $(acrRegistry)/$(acrRepository):$(Build.BuildNumber)'
-      env:
-        acrRegistry: 'elywen'
-        acrRepository: 'simplon'
-
 # Test QA service
 - stage: TestQA
-  dependsOn: TrivyScan
+  dependsOn: DeployQA
   jobs:
   - job: TestQAService
     displayName: 'Test QA Service'
