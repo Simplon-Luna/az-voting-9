@@ -87,8 +87,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: ManualValidation@2
+    - task: ManualValidation@0
       inputs:
+        notifyUsers: 'simplon.luna@gmail.com'
         instructions: 'Trivy scan failed. Do you want to continue?'
 
 # - stage: AdminIntervention
