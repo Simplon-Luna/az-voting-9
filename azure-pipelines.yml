@@ -79,7 +79,6 @@ stages:
 - stage: AdminVal
   displayName: 'Admin Validation'
   dependsOn: TrivyScanSec
-  condition: failed()
   jobs:
   - job: waitForValidation
     displayName: Wait for external validation  
