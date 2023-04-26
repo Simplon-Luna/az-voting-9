@@ -87,7 +87,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: ManualIntervention@1
+    - task: ManualIntervention@8
       inputs:
         instructions: 'Trivy scan failed. Do you want to continue?'
 
