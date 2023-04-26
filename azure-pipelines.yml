@@ -45,16 +45,12 @@ stages:
         image: 'elywen/simplon'
         severities: 'CRITICAL,HIGH,MEDIUM'
         ignoreUnfixed: true
-      displayName: 'Run Trivy scan and save report'
-      # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
-      # so that it can be uploaded as an artifact in the next step.
-    - task: CmdLine@2
-      inputs:
         script: |
           mkdir -p $(Build.ArtifactStagingDirectory)/report
           trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
-      displayName: 'Save Trivy report as artifact'
-      condition: succeededOrFailed()
+      displayName: 'Run Trivy scan and save report'
+      # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
+      # so that it can be uploaded as an artifact in the next step.
       # Check out the GitHub repository using a Personal Access Token (PAT) as a secure way to authenticate.
       # The token should have the "repo" scope.
     - checkout: self
