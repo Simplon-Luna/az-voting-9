@@ -48,19 +48,24 @@ stages:
       displayName: 'Run Trivy scan and save report'
       # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
       # so that it can be uploaded as an artifact in the next step.
-        - script: |
+    - task: CmdLine@2
+      inputs:
+        script: |
           mkdir -p $(Build.ArtifactStagingDirectory)/report
           trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
       displayName: 'Save Trivy report as artifact'
       # Check out the GitHub repository using a Personal Access Token (PAT) as a secure way to authenticate.
       # The token should have the "repo" scope.
-      - checkout: self
-        persistCredentials: true
-        clean: true
-        displayName: 'Checkout GitHub repository'
+    - checkout: self
+      persistCredentials: true
+      clean: true
+
+      displayName: 'Checkout GitHub repository'
         # Copy the Trivy report from the artifact staging directory to the local directory of the checked-out repository
         # so that it can be committed and pushed to the remote repository.
-      - script: |
+    - task: CmdLine@2
+      inputs:
+        script: |
           cp $(Build.ArtifactStagingDirectory)/report/trivy-report.json ./report/
           git add reports/trivy-report.json
           git config --global user.email "simplon.luna@gmail.com"
