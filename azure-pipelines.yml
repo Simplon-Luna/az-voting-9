@@ -53,10 +53,7 @@ stages:
         severities: 'CRITICAL,HIGH,MEDIUM'
         ignoreUnfixed: true
       displayName: 'Run Trivy scan and save report'
-      # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
-      # so that it can be uploaded as an artifact in the next step.
       # Check out the GitHub repository using a Personal Access Token (PAT) as a secure way to authenticate.
-      # The token should have the "repo" scope.
     - checkout: self
       persistCredentials: true
       displayName: 'Checkout GitHub repository'
@@ -76,6 +73,7 @@ stages:
       displayName: 'Push Trivy report to GitHub'
       condition: always()
 
+# Admin acknowledgement 1
 - stage: AdminVal
   displayName: 'Admin Validation'
   dependsOn: TrivyScanSec
@@ -89,8 +87,8 @@ stages:
       timeoutInMinutes: 60 # task times out in 1 day
       inputs:
         notifyUsers: |
-          test@test.com
-          example@example.com
+          simplon.luna@gmail.com
+          ReviewAdmin@domain.com
         instructions: 'Trivy scan failed. Do you want to continue?'
         onTimeout: 'reject'
 
@@ -114,6 +112,62 @@ stages:
         secretType: 'dockerRegistry'
         containerRegistryType: 'Container Registry'
         dockerRegistryEndpoint: 'DockerHubConnection'
+
+# OWASP ZAP Scan
+- stage: ZapScanSec
+  dependsOn: DeployQA
+  jobs:
+    - job: ZapScan
+      displayName: 'Run OWASP Zap security scan'
+      continueOnError: true
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: owaspzap@1
+        inputs:
+          aggressivemode: true
+          scantype: 'targetedScan'
+          url: 'https://kittyqa.simplon-ely.space/'
+          port: '80, 443'
+        displayName: 'Run OWASP Zap scan and save report'
+        # Check out the GitHub repository using a Personal Access Token (PAT) as a secure way to authenticate.
+      - checkout: self
+        persistCredentials: true
+        displayName: 'Checkout GitHub repository'
+        condition: always()
+          # Copy the OWASP Zap report from the artifact staging directory to the local directory of the checked-out repository so that it can be committed and pushed to the remote repository.
+      - task: CmdLine@2
+        inputs:
+          script: |
+            mkdir reports
+            file=$(find . -name report.json)
+            cp "$file" reports/zap-report.json
+            git add reports/zap-report.json
+            git config --global user.email "simplon.luna@gmail.com"
+            git config --global user.name "Simplon-Luna"
+            git commit -m "Add OWASP Zap test results"
+            git push origin HEAD:main
+        displayName: 'Push OWASP Zap report to GitHub'
+        condition: always()
+
+# Admin acknowledgement 2
+- stage: AdminVal
+  displayName: 'Admin Validation'
+  dependsOn: TrivyScanSec
+  jobs:
+  - job: waitForValidation
+    displayName: Wait for external validation  
+    pool: server    
+    timeoutInMinutes: 1440 # job times out in 3 days
+    steps:   
+    - task: ManualValidation@0
+      timeoutInMinutes: 60 # task times out in 1 day
+      inputs:
+        notifyUsers: |
+          simplon.luna@gmail.com
+          ReviewAdmin@domain.com
+        instructions: 'Trivy scan failed. Do you want to continue?'
+        onTimeout: 'reject'
 
 # Test QA service
 - stage: TestQA
