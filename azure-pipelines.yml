@@ -31,10 +31,10 @@ stages:
 # Security Trivy
 - stage: TrivyScanSec
   dependsOn: Build
-  continueOnError: true
   jobs:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
+    continueOnError: true
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -86,7 +86,7 @@ stages:
   - job: Prompt
     displayName: 'Prompt for admin intervention'
     pool:
-    vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-latest'
     steps:
     - script: |
         echo "Trivy scan failed. Do you want to continue?"
