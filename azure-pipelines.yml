@@ -40,7 +40,7 @@ stages:
   jobs:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
-    continueOnError: true
+    continueOnError: false
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -81,16 +81,20 @@ stages:
   dependsOn: TrivyScanSec
   condition: failed()
   jobs:
-  - job: PromptForApproval
-    displayName: 'Prompt for approval'
-    timeoutInMinutes: 60
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
+  - job: waitForValidation
+    displayName: Wait for external validation  
+    pool: server    
+    timeoutInMinutes: 1440 # job times out in 3 days
+    steps:   
     - task: ManualValidation@0
+      timeoutInMinutes: 60 # task times out in 1 day
       inputs:
-        notifyUsers: 'simplon.luna@gmail.com'
+        notifyUsers: |
+          test@test.com
+          example@example.com
         instructions: 'Trivy scan failed. Do you want to continue?'
+        onTimeout: 'reject'
+
 
 # - stage: AdminIntervention
 #   dependsOn: TrivyScanSec
