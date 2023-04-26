@@ -40,7 +40,7 @@ stages:
   jobs:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
-    continueOnError: false
+    continueOnError: true
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -94,27 +94,6 @@ stages:
           example@example.com
         instructions: 'Trivy scan failed. Do you want to continue?'
         onTimeout: 'reject'
-
-
-# - stage: AdminIntervention
-#   dependsOn: TrivyScanSec
-#   condition: failed()
-#   displayName: 'Prompt for user input'
-#   jobs:
-#   - job: Prompt
-#     displayName: 'Prompt for admin intervention'
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     - script: |
-#         echo "Trivy scan failed. Do you want to continue?"
-#         select yn in "Yes" "No"; do
-#           case $yn in
-#             Yes ) echo "Continuing pipeline..."; exit 0;;
-#             No ) echo "Stopping pipeline..."; exit 1;;
-#           esac
-#         done
-
 
 # Deploy to QA
 - stage: DeployQA
