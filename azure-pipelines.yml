@@ -69,14 +69,6 @@ stages:
           git push origin HEAD:main
       displayName: 'Push Trivy report to GitHub'
       condition: always()
-    - task: CmdLine@2
-      condition: eq(variables['trivy@1.Status'], 'failed')
-      inputs:
-        script: |
-          if [ ${{ dependencies.trivyScan.outputs['trivyScan.reportexitcode'] }} -eq 1 ]; then
-            echo 'Trivy scan failed. Do you want to continue?'
-            read -p "Press enter to continue or Ctrl+C to exit"
-          fi
 
 - stage: AdminIntervention
   dependsOn: TrivyScanSec
@@ -96,7 +88,7 @@ stages:
             No ) echo "Stopping pipeline..."; exit 1;;
           esac
         done
-
+        
 # Deploy to QA
 - stage: DeployQA
   dependsOn: AdminIntervention
