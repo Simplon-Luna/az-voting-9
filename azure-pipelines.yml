@@ -45,7 +45,6 @@ stages:
         image: 'elywen/simplon'
         severities: 'CRITICAL,HIGH,MEDIUM'
         ignoreUnfixed: true
-        options: --output /home/vsts/work/1/trivy-report.json
       displayName: 'Run Trivy scan and save report'
       # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
       # so that it can be uploaded as an artifact in the next step.
