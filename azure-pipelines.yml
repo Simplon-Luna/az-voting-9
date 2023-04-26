@@ -76,8 +76,8 @@ stages:
       displayName: 'Push Trivy report to GitHub'
       condition: always()
 
-- stage: AdminIntervention
-  displayName: 'Admin Intervention'
+- stage: AdminVal
+  displayName: 'Admin Validation'
   dependsOn: TrivyScanSec
   condition: failed()
   jobs:
@@ -87,7 +87,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: ManualIntervention@8
+    - task: ManualValidation@2
       inputs:
         instructions: 'Trivy scan failed. Do you want to continue?'
 
@@ -113,7 +113,7 @@ stages:
 
 # Deploy to QA
 - stage: DeployQA
-  dependsOn: AdminIntervention
+  dependsOn: AdminVal
   jobs:
   - job: DeployToQA
     displayName: 'Deploy to QA'
