@@ -54,13 +54,13 @@ stages:
           mkdir -p $(Build.ArtifactStagingDirectory)/report
           trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
       displayName: 'Save Trivy report as artifact'
+      condition: succeededOrFailed()
       # Check out the GitHub repository using a Personal Access Token (PAT) as a secure way to authenticate.
       # The token should have the "repo" scope.
     - checkout: self
       persistCredentials: true
-      clean: true
-
       displayName: 'Checkout GitHub repository'
+      condition: succeeded()
         # Copy the Trivy report from the artifact staging directory to the local directory of the checked-out repository
         # so that it can be committed and pushed to the remote repository.
     - task: CmdLine@2
@@ -73,6 +73,7 @@ stages:
           git commit -m "Add Trivy report"
           git push origin HEAD:main
       displayName: 'Push Trivy report to GitHub'
+      condition: succeeded()
 
 
 # Deploy to QA
