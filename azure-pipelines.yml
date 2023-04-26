@@ -84,12 +84,12 @@ stages:
     timeoutInMinutes: 1440 # job times out in 3 days
     steps:   
     - task: ManualValidation@0
-      timeoutInMinutes: 60 # task times out in 1 day
+      timeoutInMinutes: 120 # task times out in 1 day
       inputs:
         notifyUsers: |
           simplon.luna@gmail.com
           ReviewAdmin@domain.com
-        instructions: 'Trivy scan failed. Do you want to continue?'
+        instructions: 'Trivy scan found vulnerabilities. Do you want to continue?'
         onTimeout: 'reject'
 
 # Deploy to QA
@@ -161,12 +161,12 @@ stages:
     timeoutInMinutes: 1440 # job times out in 3 days
     steps:   
     - task: ManualValidation@0
-      timeoutInMinutes: 60 # task times out in 1 day
+      timeoutInMinutes: 120 # task times out in 1 day
       inputs:
         notifyUsers: |
           simplon.luna@gmail.com
           ReviewAdmin@domain.com
-        instructions: 'Trivy scan failed. Do you want to continue?'
+        instructions: 'OWASP ZAP Scan found vulnerabilities. Do you want to continue?'
         onTimeout: 'reject'
 
 # Test QA service
