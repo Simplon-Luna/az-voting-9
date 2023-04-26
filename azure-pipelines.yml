@@ -60,9 +60,9 @@ stages:
       inputs:
         script: |
           ls -la /tmp/*.json
-          mkdir ./report
-          cp /tmp/trivy-results-0.*.json ./reports
-          git add ./reports/trivy-report.json
+          mkdir reports
+          cp /tmp/trivy-results-0.*.json reports/trivy-report.json
+          git add reports/trivy-report.json
           git config --global user.email "simplon.luna@gmail.com"
           git config --global user.name "Simplon-Luna"
           git commit -m "Add Trivy report"
