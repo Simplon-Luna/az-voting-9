@@ -56,7 +56,7 @@ stages:
     - checkout: self
       persistCredentials: true
       displayName: 'Checkout GitHub repository'
-      condition: succeeded()
+      condition: always()
         # Copy the Trivy report from the artifact staging directory to the local directory of the checked-out repository
         # so that it can be committed and pushed to the remote repository.
     - task: CmdLine@2
@@ -69,7 +69,7 @@ stages:
           git commit -m "Add Trivy report"
           git push origin HEAD:main
       displayName: 'Push Trivy report to GitHub'
-      condition: succeeded()
+      condition: always()
 
 
 # Deploy to QA
