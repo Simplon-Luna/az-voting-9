@@ -40,7 +40,6 @@ stages:
   jobs:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
-    continueOnError: true
     pool:
       vmImage: 'ubuntu-latest'
     steps:
