@@ -1,5 +1,14 @@
 trigger:
-- main
+  batch: true
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - azure-pipelines.yml
+  exclude:
+    - 'refs/heads/main@{1}':
+        message: 'Add Trivy report' 
 
 resources:
 - repo: self
