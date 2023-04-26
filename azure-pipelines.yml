@@ -112,7 +112,7 @@ stages:
 
 # Test QA service
 - stage: TestQA
-  dependsOn: TrivyScanSec
+  dependsOn: DeployQA
   jobs:
   - job: TestQAService
     displayName: 'Test QA Service'
