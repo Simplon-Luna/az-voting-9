@@ -45,10 +45,7 @@ stages:
         image: 'elywen/simplon'
         severities: 'CRITICAL,HIGH,MEDIUM'
         ignoreUnfixed: true
-        script: |
-          mkdir -p $(Build.ArtifactStagingDirectory)/report
-          trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
-          echo "hello world"
+        options: 'mkdir -p $(Build.ArtifactStagingDirectory)/report ; trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest ; echo "hello world"'
       displayName: 'Run Trivy scan and save report'
       # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
       # so that it can be uploaded as an artifact in the next step.
@@ -63,9 +60,6 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          mkdir -p $(Build.ArtifactStagingDirectory)/report
-          trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
-          echo "hello world"
           cp $(Build.ArtifactStagingDirectory)/report/trivy-report.json ./report/
           git add reports/trivy-report.json
           git config --global user.email "simplon.luna@gmail.com"
