@@ -31,6 +31,7 @@ stages:
 # Security Trivy
 - stage: TrivyScanSec
   dependsOn: Build
+  continueOnError: true
   jobs:
   - job: TrivyScan
     displayName: 'Run Trivy Scan'
@@ -59,7 +60,6 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
-          ls -la /tmp/*.json
           mkdir reports
           cp /tmp/trivy-results-0.*.json reports/trivy-report.json
           git add reports/trivy-report.json
@@ -69,11 +69,37 @@ stages:
           git push origin HEAD:main
       displayName: 'Push Trivy report to GitHub'
       condition: always()
+    - task: CmdLine@2
+      condition: eq(variables['trivy@1.Status'], 'failed')
+      inputs:
+        script: |
+          if [ ${{ dependencies.trivyScan.outputs['trivyScan.reportexitcode'] }} -eq 1 ]; then
+            echo 'Trivy scan failed. Do you want to continue?'
+            read -p "Press enter to continue or Ctrl+C to exit"
+          fi
 
+- stage: AdminIntervention
+  dependsOn: TrivyScanSec
+  condition: failed()
+  displayName: 'Prompt for user input'
+  jobs:
+  - job: Prompt
+    displayName: 'Prompt for admin intervention'
+    pool:
+    vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        echo "Trivy scan failed. Do you want to continue?"
+        select yn in "Yes" "No"; do
+          case $yn in
+            Yes ) echo "Continuing pipeline..."; exit 0;;
+            No ) echo "Stopping pipeline..."; exit 1;;
+          esac
+        done
 
 # Deploy to QA
 - stage: DeployQA
-  dependsOn: TrivyScanSec
+  dependsOn: AdminIntervention
   jobs:
   - job: DeployToQA
     displayName: 'Deploy to QA'
