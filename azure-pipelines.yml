@@ -48,6 +48,7 @@ stages:
         script: |
           mkdir -p $(Build.ArtifactStagingDirectory)/report
           trivy --format json -o $(Build.ArtifactStagingDirectory)/report/trivy-report.json elywen/simplon:latest
+          echo "hello world"
       displayName: 'Run Trivy scan and save report'
       # Save the Trivy report to a file in the $(Build.ArtifactStagingDirectory) directory
       # so that it can be uploaded as an artifact in the next step.
